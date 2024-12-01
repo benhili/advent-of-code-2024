@@ -4,10 +4,8 @@ import (
 	"bufio"
 	"flag"
 	"fmt"
-	"maps"
 	"os"
 	"regexp"
-	"slices"
 	"sort"
 	"strconv"
 )
@@ -69,9 +67,6 @@ func part2(left []int, right []int) int {
 	for _, v := range left {
 		freqMap[v] = freqMap[v] + 1
 	}
-
-	vals := slices.Collect(maps.Values(freqMap))
-	fmt.Println(vals)
 
 	for _, v := range right {
 		freq, ok := freqMap[v]
