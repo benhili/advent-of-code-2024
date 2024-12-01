@@ -64,11 +64,12 @@ func part1(left []int, right []int) int {
 func part2(left []int, right []int) int {
 	var similarity int
 	freqMap := make(map[int]int)
-	for _, v := range left {
+
+	for _, v := range right {
 		freqMap[v] = freqMap[v] + 1
 	}
 
-	for _, v := range right {
+	for _, v := range left {
 		freq, ok := freqMap[v]
 		if ok {
 			similarity = similarity + freq*v
