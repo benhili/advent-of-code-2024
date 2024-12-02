@@ -43,7 +43,7 @@ func parse_input(f *os.File) ([]int, []int) {
 	return left, right
 }
 
-func part1(left []int, right []int) int {
+func part1(left, right []int) int {
 	if len(left) != len(right) {
 		panic("left and right are not the same length!")
 	}
@@ -61,7 +61,7 @@ func part1(left []int, right []int) int {
 	return sumDifferences
 }
 
-func part2(left []int, right []int) int {
+func part2(left, right []int) int {
 	var similarity int
 	freqMap := make(map[int]int)
 
