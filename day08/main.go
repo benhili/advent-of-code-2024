@@ -18,25 +18,29 @@ func main() {
 	flag.IntVar(&part, "part", 1, "part 1 or 2")
 	flag.Parse()
 	fmt.Println("Running part", part)
-	file, _ := os.ReadFile("example.txt")
-	antennaMap := parse(file)
+	file, _ := os.ReadFile("input.txt")
+	antennaCoordinates := parse(file)
 
 	if part == 1 {
-		ans := part1(antennaMap)
+		ans := part1(antennaCoordinates)
 		fmt.Println("Output:", ans)
 	} else {
-		// ans := part2(antennaMap)
-		// fmt.Println("Output:", ans)
+		ans := part2(antennaCoordinates)
+		fmt.Println("Output:", ans)
 	}
 }
 
-func parse(file []byte) [][]string {
-	var antennaMap [][]string
+func parse(file []byte) map[string][]coords {
+	antennas := make(map[string][]coords)
 
-	for _, line := range strings.Split(string(file), "\n") {
-		antennaMap = append(antennaMap, strings.Split(line, ""))
+	for y, line := range strings.Split(string(file), "\n") {
+		for x, symbol := range strings.Split(line, "") {
+			if symbol != "." {
+				antennas[symbol] = append(antennas[symbol], coords{x: x, y: y})
+			}
+		}
 	}
-	return antennaMap
+	return antennas
 }
 
 func inBounds(yLimit, xLimit, y, x int) bool {
@@ -46,71 +50,16 @@ func inBounds(yLimit, xLimit, y, x int) bool {
 	return false
 }
 
-func getAtennas(antennaMap [][]string) map[string][]coords {
-	antennas := make(map[string][]coords)
-	for y, row := range antennaMap {
-		for x, symbol := range row {
-			if symbol != "." {
-				antennas[symbol] = append(antennas[symbol], coords{x: x, y: y})
-			}
-		}
-	}
-	return antennas
-}
-
-func calculatePairAntinodeCoords(a1, a2 coords) (coords, coords) {
-	antinode1 := coords{x: -999, y: -999}
-	antinode2 := coords{x: -999, y: -999}
-	xDist := max(a1.x-a2.x, a2.x-a1.x)
-	yDist := max(a1.y-a2.y, a2.y-a1.y)
-	// diagonal (x and y are different)
-	if a1.y < a2.y {
-		// a1 higher
-		antinode1.y = a1.y - yDist
-		antinode2.y = a2.y + yDist
-	} else if a2.y < a1.y {
-		// a2 higher
-		antinode1.y = a1.y + yDist
-		antinode2.y = a2.y - yDist
-	} else {
-		// same height
-		antinode1.y = a1.y
-		antinode2.y = a2.y
-	}
-
-	if a1.x < a2.x {
-		// a1 leftmost
-		antinode1.x = a1.x - xDist
-		antinode2.x = a2.x + xDist
-	} else if a2.x < a1.x {
-		// a2 leftmost
-		antinode1.x = a1.x + xDist
-		antinode2.x = a2.x - xDist
-	} else {
-		// same horizontal
-		antinode1.x = a1.x
-		antinode2.x = a2.x
-	}
-
-	if antinode1.x == -999 || antinode1.y == -999 || antinode2.x == -999 || antinode2.y == -999 {
-		panic("SOMETHINGS WRONG")
-	}
-
-	return antinode1, antinode2
-}
-
 // turns coords into key in shape "y,x"
 func coordsToKey(coord coords) string {
 	return strconv.Itoa(coord.y) + "," + strconv.Itoa(coord.x)
 }
 
-func part1(antennaMap [][]string) int {
-	antennas := getAtennas(antennaMap)
-	sum := 0
+func part1(antennaCoordinates map[string][]coords) int {
 	seen := make(map[string]bool)
-
-	for k := range antennas {
-		coordList := antennas[k]
+	yLimit, xLimit := 50, 50
+	for k := range antennaCoordinates {
+		coordList := antennaCoordinates[k]
 		if len(coordList) < 2 {
 			// need at least 2 antennas to make an antinode
 			continue
@@ -120,23 +69,66 @@ func part1(antennaMap [][]string) int {
 			for j := i + 1; j < len(coordList); j++ {
 				a1 := coordList[i]
 				a2 := coordList[j]
-				antinode1, antinode2 := calculatePairAntinodeCoords(a1, a2)
-				if inBounds(len(antennaMap), len(antennaMap[0]), antinode1.y, antinode1.x) {
+				antinode1 := coords{x: a1.x + (a1.x - a2.x), y: a1.y + (a1.y - a2.y)}
+				antinode2 := coords{x: a2.x + (a2.x - a1.x), y: a2.y + (a2.y - a1.y)}
+				if inBounds(yLimit, xLimit, antinode1.y, antinode1.x) {
 					strKey := coordsToKey(antinode1)
 					if !(seen[strKey]) {
-						sum += 1
 						seen[strKey] = true
 					}
 				}
-				if inBounds(len(antennaMap), len(antennaMap[0]), antinode2.y, antinode2.x) {
+				if inBounds(yLimit, xLimit, antinode2.y, antinode2.x) {
 					strKey := coordsToKey(antinode2)
 					if !(seen[strKey]) {
-						sum += 1
 						seen[strKey] = true
 					}
 				}
 			}
 		}
 	}
-	return sum
+	return len(seen)
+}
+
+func part2(antennaCoordinates map[string][]coords) int {
+	seen := make(map[string]bool)
+	yLimit, xLimit := 50, 50
+	for k := range antennaCoordinates {
+		coordList := antennaCoordinates[k]
+		if len(coordList) < 2 {
+			// need at least 2 antennas to make an antinode
+			continue
+		}
+
+		for i := 0; i < len(coordList); i++ {
+			for j := i + 1; j < len(coordList); j++ {
+				a1 := coordList[i]
+				a2 := coordList[j]
+				seen[coordsToKey(a1)] = true
+				seen[coordsToKey(a2)] = true
+				var antinodes []coords
+				xDiff1 := (a1.x - a2.x)
+				yDiff1 := (a1.y - a2.y)
+				xDiff2 := (a2.x - a1.x)
+				yDiff2 := (a2.y - a1.y)
+
+				for i := 0; i < yLimit; i++ {
+					antinode1 := coords{x: a1.x + xDiff1, y: a1.y + yDiff1}
+					antinode2 := coords{x: a2.x + xDiff2, y: a2.y + yDiff2}
+					antinodes = append(antinodes, antinode1, antinode2)
+					a1 = antinode1
+					a2 = antinode2
+				}
+
+				for _, antinode := range antinodes {
+					if inBounds(yLimit, xLimit, antinode.y, antinode.x) {
+						strKey := coordsToKey(antinode)
+						if !(seen[strKey]) {
+							seen[strKey] = true
+						}
+					}
+				}
+			}
+		}
+	}
+	return len(seen)
 }
