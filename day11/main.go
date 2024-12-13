@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	part, file, start := utils.Setup()
+	part, file, start := utils.Setup("input.txt")
 
 	stones := make(map[int]int)
 	for _, v := range strings.Split(string(file), " ") {

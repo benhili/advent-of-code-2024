@@ -14,7 +14,7 @@ type block struct {
 }
 
 func main() {
-	part, file, start := utils.Setup()
+	part, file, start := utils.Setup("input.txt")
 	strNums := strings.Split(string(file), "")
 	input := parse(strNums)
 

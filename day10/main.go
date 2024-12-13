@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	part, file, start := utils.Setup()
+	part, file, start := utils.Setup("input.txt")
 	trailMap := parse(file)
 
 	if part == 1 {
