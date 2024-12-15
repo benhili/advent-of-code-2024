@@ -25,7 +25,6 @@ func main() {
 	plantMap := fileTo2dStringSlice(string(file))
 	if part == 1 {
 		ans := part1(plantMap)
-		fmt.Println("------------------")
 		fmt.Println("Output:", ans)
 	} else {
 		ans := part2(plantMap)
